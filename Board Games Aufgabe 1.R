@@ -7,10 +7,10 @@
 load("board games")
 
 ratings<- as.data.frame(tuesdata$ratings)
-head(ratings)
+#head(ratings)
 
 details <- as.data.frame(tuesdata$details)
-head(details)
+#head(details)
 
 
 #########################################
