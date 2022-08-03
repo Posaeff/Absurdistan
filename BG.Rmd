@@ -1,0 +1,124 @@
+---
+title: "Board Games"
+output: pdf_document
+date: "2022-01-25"
+---
+
+
+```{r, echo=FALSE,warning=FALSE}
+#library("tidytuesdayR")
+#tuesdata <- tidytuesdayR::tt_load('2022-01-25')
+#save(tuesdata,file = "board games")
+
+load("board games")
+
+ratings<- as.data.frame(tuesdata$ratings)
+head(ratings)
+
+details <- as.data.frame(tuesdata$details)
+head(details)
+```
+
+
+```{r, echo =FALSE,warning=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(ggdark)
+library(ggrepel)
+```
+
+```{r}
+head(details)
+
+df <- details %>%
+  select(num,primary,owned,wishing,trading,wanting,yearpublished) %>% 
+  filter(num < 25) %>%
+  mutate(wtw= wishing+trading+wanting)
+
+df_owned <- df %>% 
+  select(primary,owned) %>% 
+  mutate(counts = owned)
+
+df_wtw <- df %>% 
+  select(primary,wtw) %>% 
+  mutate(counts = wtw)
+
+
+yearspub  <- list(unique(details$yearpublished))
+  
+#?ifelse
+
+# df2 <- df %>%
+#   select(primary,owned,wtw,num) %>%
+#   group_by(primary) %>%
+#   pivot_longer(cols=2:3,
+#                names_to = "type",
+#                values_to= "cases")
+
+
+str(df2)
+
+```
+
+```{r}
+
+
+head(df)
+
+p1<- ggplot(NULL, aes(reorder(primary,+df_owned$owned),counts)) +
+     geom_bar(aes(fill="owned"), data = df_owned, alpha= 0.5,stat = "identity")+
+     geom_bar(aes(fill="wtw"), data = df_wtw, alpha=0.5,stat = "identity") +
+      
+  coord_flip() 
+
+install.packages("patchwork")
+library(patchwork)
+
+
+p2 <- ggplot(NULL, aes(reorder(primary,+df_owned$owned),counts)) +
+     geom_bar(aes(fill="wtw"), data = df_wtw, alpha=0.5,stat = "identity") +
+      
+  coord_flip() 
+
+p1+ p2
+
+?patchwork
+
+# p + dark_theme_gray() +
+#   labs(title = "Top 25 board games",
+#        subtitle = "owned or Wanting,Trading,Wishing (w,t,w) board games",
+#        fill="owned vs w,t,w") +
+#   xlab("board  games") +
+#   theme(axis.title = element_blank()) 
+
+
+
+
+  # geom_text_repel(
+  #   aes(label = owned), data = df_owned,
+  #   fontface ="plain", color = "white", size = 2.5,
+  #   position = position_nudge_repel(
+  #     y=-2
+  #   ))
+
+
+#?position_nudge_repel()
+
+# ?theme
+# ?geom_text
+# (CGPfunctions)
+#     
+# ??rowvalue     
+
+```
+
+
+
+```{r}
+
+head(ratings)
+
+
+```
+
+
