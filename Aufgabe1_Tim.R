@@ -16,7 +16,7 @@ library(ggdark)
 counts_details <- details %>% 
   group_by(yearpublished) %>% 
   count(name = "counts") %>% 
-  ungroup() %>% 
+  ungroup() %>%
   mutate(counts_cat = as.factor( 
     ifelse(counts >=1 & counts <=100, "[1-100]",
            ifelse(counts >= 101 & counts <= 250, "[101-250]", 
@@ -32,6 +32,74 @@ counts_details$counts_cat <-factor(counts_details$counts_cat,
                                               ">1000"))
 
 
+?xlim
+
+p1<- counts_details %>% 
+  ggplot(aes(yearpublished, counts, group=1, 
+             colour = counts_cat)) +
+  geom_point(aes(size = counts_cat)) +
+  xlim(-3500, 1500) +
+  ylim(0, 200) +
+ dark_theme_gray() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank())+
+  scale_colour_manual(values=myColors) +
+  labs(title = "mytitle", subtitle = "my subtitle")
+
+p2<- counts_details %>% 
+  ggplot(aes(yearpublished, counts, group=1, 
+             colour = counts_cat)) +
+  geom_point(aes(size = counts_cat)) +
+  xlim(1501,1880)+
+  ylim(0,200)+
+  dark_theme_gray() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank())+
+  scale_colour_manual(values=myColors)
+
+
+
+p3<- counts_details %>% 
+  ggplot(aes(yearpublished, counts, group=1, 
+             colour = counts_cat)) +
+  geom_point(aes(size = counts_cat)) +
+  xlim(1881,1975)+
+  ylim(0,200) +
+  dark_theme_gray() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank())+
+  scale_colour_manual(values=myColors)
+
+
+
+
+p4<- counts_details %>% 
+  ggplot(aes(yearpublished, counts, group=1, 
+             colour = counts_cat)) +
+  geom_point(aes(size = counts_cat)) +
+  xlim(1976, 2023) +
+  ylim(0,1500) +
+  dark_theme_gray() +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank()) +
+  scale_colour_manual(values=myColors)
+
+
+#
+
+
+
+p0<- p1/p2/p3/p4 +
+  plot_layout(guides = 'collect') 
+
+p0 + labs(caption = "Quelle")
+
+###########################################################
+
 df3 <- counts_details %>% 
   select(yearpublished, counts, counts_cat) %>% 
   filter(yearpublished >= -3500 & yearpublished <= 1975) %>% 
@@ -46,12 +114,7 @@ df4 <- counts_details %>%
 
 ######
 
-library(RColorBrewer)
-display.brewer.all(colorblindFriendly = TRUE)
-display.brewer.all()
 
-myColors <- c("#FFFF00","#FFA54F","#EE7942","#DD5B45","#8B3E2F")
-barplot(rep(length(myColors),length(myColors)), col=c(myColors));myColors
 
 ######
 
@@ -91,8 +154,8 @@ legend.position = "none"
 
 legend <- get_legend(p4)
 
-p_0L <- plot_grid(p3 + theme(axis.title.y = element_blank()), 
-                p4 + theme(axis.title.y = element_blank()),
+p_0L <- plot_grid(p1 + theme(axis.title.y = element_blank()), 
+                p2 + theme(axis.title.y = element_blank()),
                 
                    ncol = 1,
                    labels = "auto")
