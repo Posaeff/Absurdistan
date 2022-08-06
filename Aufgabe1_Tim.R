@@ -10,6 +10,7 @@ library(cowplot)
 library(tidyverse)
 library(patchwork)
 library(ggdark)
+library(Hmisc)
 ####################
 #head(details)
 
@@ -17,12 +18,20 @@ counts_details <- details %>%
   group_by(yearpublished) %>% 
   count(name = "counts") %>% 
   ungroup() %>%
+  #mutate(yearpublished = as.factor(yearpublished))%>%
   mutate(counts_cat = as.factor( 
     ifelse(counts >=1 & counts <=100, "[1-100]",
            ifelse(counts >= 101 & counts <= 250, "[101-250]", 
                   ifelse(counts >= 251 & counts <=500, "[251-500]",
                          ifelse(counts >=501 & counts <=1000, "[501-1000]",
-                                ifelse(counts >=1001,">1000" ,"999")))))))
+                                ifelse(counts >=1001,">1000" ,"999"))))))) %>% 
+  mutate(year_cat = as.factor(
+    ifelse(yearpublished >= -3500 & yearpublished <= 1500,"1",
+           ifelse(yearpublished >= 1501 & yearpublished <=1880 ,"2",
+                  ifelse(yearpublished >= 1881 & yearpublished <= 1975,"3",
+                         ifelse(yearpublished >= 1976 ,"4","999")
+                         )))
+  ))
 
 counts_details$counts_cat <-factor(counts_details$counts_cat,
                                    levels = c("[1-100]",
@@ -31,32 +40,40 @@ counts_details$counts_cat <-factor(counts_details$counts_cat,
                                               "[501-1000]",
                                               ">1000"))
 
+table(counts_details$year_cat)
 
-?xlim
+#?scale_size
+#?rev
 
-p1<- counts_details %>% 
+p1 <- counts_details %>% 
   ggplot(aes(yearpublished, counts, group=1, 
              colour = counts_cat)) +
   geom_point(aes(size = counts_cat)) +
-  xlim(-3500, 1500) +
-  ylim(0, 200) +
+#scale_x_discrete(breaks = c("-3500", "-2000",
+                              # "-1000", 
+                              #"0","1000", "1500")) +
  dark_theme_gray() +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.title = element_blank())+
+        legend.title = element_blank(),
+        axis.ticks.y = element_blank()) +
   scale_colour_manual(values=myColors) +
-  labs(title = "mytitle", subtitle = "my subtitle")
+  labs(title = "Published board games over the centuries", 
+       subtitle = "-3500 - 2023") +
+  facet_wrap(~year_cat,scales = "free", ncol = 1)
 
-p2<- counts_details %>% 
+
+p1
+  p2<- counts_details %>% 
   ggplot(aes(yearpublished, counts, group=1, 
              colour = counts_cat)) +
   geom_point(aes(size = counts_cat)) +
-  xlim(1501,1880)+
-  ylim(0,200)+
+  coord_cartesian(xlim=c(1501,1880), ylim=c(0,200))+
   dark_theme_gray() +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.title = element_blank())+
+        legend.title = element_blank(),
+        axis.ticks.y = element_blank()) +
   scale_colour_manual(values=myColors)
 
 
@@ -65,12 +82,12 @@ p3<- counts_details %>%
   ggplot(aes(yearpublished, counts, group=1, 
              colour = counts_cat)) +
   geom_point(aes(size = counts_cat)) +
-  xlim(1881,1975)+
-  ylim(0,200) +
+  coord_cartesian(xlim=c(1881,1975),ylim=c(0,200)) +
   dark_theme_gray() +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.title = element_blank())+
+        legend.title = element_blank(),
+        axis.ticks.y = element_blank())+
   scale_colour_manual(values=myColors)
 
 
@@ -80,21 +97,23 @@ p4<- counts_details %>%
   ggplot(aes(yearpublished, counts, group=1, 
              colour = counts_cat)) +
   geom_point(aes(size = counts_cat)) +
-  xlim(1976, 2023) +
-  ylim(0,1500) +
+  coord_cartesian(xlim=c(1976, 2023),ylim=c(0,1500)) +
   dark_theme_gray() +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
-        legend.title = element_blank()) +
+        legend.title = element_blank(),
+        axis.ticks.y = element_blank())+
   scale_colour_manual(values=myColors)
+
+#?ylim
 
 
 #
 
 
 
-p0<- p1/p2/p3/p4 +
-  plot_layout(guides = 'collect') 
+p0<-  p1/p2/p3/p4 +
+  plot_layout(guides = 'collect') & theme(legend.position = "right")
 
 p0 + labs(caption = "Quelle")
 
