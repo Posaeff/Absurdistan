@@ -1,4 +1,4 @@
-load("board games")
+load("BoardGames/Data/board games")
 
 ratings<- as.data.frame(tuesdata$ratings)
 #head(ratings)
@@ -12,6 +12,7 @@ library(patchwork)
 library(ggdark)
 library(Hmisc)
 library(extrafont)
+loadfonts(device = "win")
 ####################
 #head(details)
 
@@ -19,9 +20,12 @@ counts_details <- details %>%
   group_by(yearpublished) %>% 
   count(name = "counts") %>% 
   ungroup() %>%
+  
+  complete(yearpublished = -3500:2023) %>% 
+  mutate_all(~replace(.,is.na(.),0)) %>% 
 
   mutate(counts_cat = as.factor( 
-    ifelse(counts >=1 & counts <=100, "[1-100]",
+    ifelse(counts >=0 & counts <=100, "[1-100]",
            ifelse(counts >= 101 & counts <= 250, "[101-250]", 
                   ifelse(counts >= 251 & counts <=500, "[251-500]",
                          ifelse(counts >=501 & counts <=1000, "[501-1000]",
@@ -39,26 +43,38 @@ counts_details$counts_cat <-factor(counts_details$counts_cat,
                                               "[251-500]",
                                               "[501-1000]",
                                               ">1000"))
-#install.packages("data.table")
-#library(data.table)
+
+
+library(norm)
 #fehlende Werte nachtragen
+###### calculate perc yearpublished
 
-counts_details$show <- "show"
+quants <- counts_details %>% 
+  group_by(year_cat)%>% 
+  summarise_at(vars(yearpublished),
+               list(min=min,
+                    Q1=~quantile(.,probs = 0.25),
+                    median=median,
+                    Q3=~quantile(.,probs=0.75),
+                    max=max))
 
-yearpublished <- c(1501,1880)
-counts <- c(0,0)
-counts_cat <- c("[1-100]","[1-100]")
-year_cat <- c("2","2")
-show <- c("invisible","invisible")
 
-temp<- data.frame(yearpublished, counts,counts_cat,year_cat,show)
+#######fehlende Werte nachtragen
+# yearpublished <- c(1501,1880,-2250,575,1188,1798,1705,1846)
+# counts <- c(0,0,0,0,0,0,0,0)
+# counts_cat <- c("[1-100]","[1-100]","[1-100]","[1-100]","[1-100]","[1-100]","[1-100]","[1-100]")
+# year_cat <- c("2","2","1","1","1","2","2","2")
+# 
+# temp<- data.frame(yearpublished, counts,counts_cat,year_cat)
+# 
+# temp$counts_cat <- as.factor(temp$counts_cat)
+# temp$year_cat <- as.factor(temp$year_cat)
+# 
+# counts_details<- bind_rows(counts_details,temp)
 
-temp$counts_cat <- as.factor(temp$counts_cat)
-temp$year_cat <- as.factor(temp$year_cat)
-
-counts_details<- bind_rows(counts_details,temp)
-
+#in factor umformatieren
 counts_details <- counts_details %>% 
+  distinct(yearpublished, .keep_all = T)%>% 
   mutate(yearpublished = as.factor(yearpublished))
 
 ####
@@ -68,8 +84,10 @@ p1 <- counts_details %>%
   ggplot(aes(yearpublished, counts, group=1, 
              colour = counts_cat)) +
   geom_point(aes(size = counts_cat), shape = 20) +
-  scale_x_discrete(breaks = c("-3500", "1500",
-  "1501","1880","1881","1975","1976","2023")) +
+  scale_x_discrete(breaks = c("-3500","-2250","-1000","250","1500",
+  "1501","1596","1691","1785","1880",
+  "1881","1905","1928","1952","1975",
+  "1976","1988","2000","2011","2023")) +
   scale_y_continuous(limits=c(1,NA)) +
   dark_theme_gray() +
   theme(axis.title.x = element_blank(),
@@ -96,4 +114,8 @@ p1 <- counts_details %>%
 p1
 
 ?facet_wrap()
+ 
 
+
+
+  
