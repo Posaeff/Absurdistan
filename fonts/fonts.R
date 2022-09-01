@@ -1,16 +1,18 @@
 #Fonts
-
+#install.packages("remotes")
 library(remotes)
+install.packages("extrafont",dependencies = T)
 remotes::install_version("Rttf2pt1", version = "1.3.8")
-#install.packages("extrafont",dependencies = T)
 library(extrafont)
-font_import()
 loadfonts(device = "win")
+font_import()
 fonts()
 
 fonttable()
 
 
+
+#Übersicht erstellen
 library(ggplot2)
 library(ggthemes)
 
